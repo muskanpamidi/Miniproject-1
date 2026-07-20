@@ -1,2 +1,2 @@
-# Miniprojrct-1
+# Miniproject-1
 Chart Summarization Tool
