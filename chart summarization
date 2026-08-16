@@ -1,0 +1,70 @@
+import re
+from collections import Counter
+
+def summarize_chat(chat, sentence_count=3):
+    # Remove extra spaces
+    chat = re.sub(r'\s+', ' ', chat).strip()
+
+    # Split chat into sentences
+    sentences = re.split(r'(?<=[.!?])\s+', chat)
+
+    # Remove common words
+    stop_words = {
+        "the", "is", "am", "are", "a", "an", "and", "or",
+        "to", "of", "in", "on", "for", "with", "this",
+        "that", "it", "we", "you", "i", "was", "were"
+    }
+
+    # Count important words
+    words = re.findall(r'\b[a-zA-Z]+\b', chat.lower())
+    word_frequency = Counter(
+        word for word in words if word not in stop_words
+    )
+
+    # Give each sentence a score
+    sentence_scores = {}
+
+    for sentence in sentences:
+        words_in_sentence = re.findall(
+            r'\b[a-zA-Z]+\b', sentence.lower()
+        )
+
+        score = sum(
+            word_frequency[word]
+            for word in words_in_sentence
+            if word in word_frequency
+        )
+
+        sentence_scores[sentence] = score
+
+    # Select important sentences
+    important_sentences = sorted(
+        sentence_scores,
+        key=sentence_scores.get,
+        reverse=True
+    )[:sentence_count]
+
+    # Keep original order
+    summary = [
+        sentence for sentence in sentences
+        if sentence in important_sentences
+    ]
+
+    return " ".join(summary)
+
+
+# Example chat
+chat = """
+Our team meeting is scheduled for Monday at 10 AM.
+Everyone should bring their project updates.
+The Python project is almost completed.
+The database connection needs some improvements.
+The testing team will start testing next week.
+The final project presentation will be on Friday.
+Everyone must submit their work before Thursday.
+"""
+
+summary = summarize_chat(chat, 3)
+
+print("CHAT SUMMARY:")
+print(summary)
